@@ -15,4 +15,6 @@ persist.sys.pihooks.lockstate=locked
 persist.sys.pihooks.device_state=locked
 persist.sys.pihooks.description=sailfish-user 8.1.0 OPM1.171019.011 4448085 release-keys
 persist.sys.pihooks.verifiedbootstate=green
-persist.sys.pihooks.flash.locked=1
+persist.sys.pihooks.flash.locked=1.0
+persist.sys.pihooks.hardware.revision=0
+persist.sys.pihooks.vbmeta.digest=8b621c8b433bd0d12f961841daada762e57e5d87717332c5ea47a7d10fd45dd6
