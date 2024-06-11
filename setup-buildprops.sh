@@ -1,8 +1,9 @@
 #!/bin/bash
 
+configs_dir="configs"
 service_file="system.prop"
-fields_file="pif.json"
-fields_file_public="pif_public.json"
+fields_file="$configs_dir/pif.json"
+fields_file_public="$configs_dir/pif_public.json"
 
 if [ ! -f $fields_file ]; then
   fields_file=$fields_file_public
