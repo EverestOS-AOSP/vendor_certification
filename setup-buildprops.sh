@@ -3,6 +3,10 @@
 service_file="system.prop"
 fields_file="pif.json"
 
+if [ ! -f $fields_file ]; then
+  exit
+fi
+
 get_field() {
   echo `cat "$fields_file" | jq -r ".$1"`
 }
