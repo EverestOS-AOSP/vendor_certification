@@ -1,7 +1,12 @@
 #!/bin/bash
 
-configs_dir="configs"
-service_file="system.prop"
+if [[ $run_from_vendorsetup = true ]]; then
+certif_root="vendor/certification"
+else
+certif_root=$(pwd)
+fi
+configs_dir="$certif_root/configs"
+service_file="$certif_root/system.prop"
 fields_file="$configs_dir/pif.json"
 fields_file_public="$configs_dir/pif_public.json"
 
