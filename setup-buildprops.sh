@@ -2,9 +2,10 @@
 
 service_file="system.prop"
 fields_file="pif.json"
+fields_file_public="pif_public.json"
 
 if [ ! -f $fields_file ]; then
-  exit
+  fields_file=$fields_file_public
 fi
 
 get_field() {
