@@ -1,3 +1,5 @@
 pif.json 
 config.xml
 system.prop
+configs/*
+!pif_public.json
