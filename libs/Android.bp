@@ -1,0 +1,7 @@
+filegroup {
+    name: "certification-utils-srcs",
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
+}
