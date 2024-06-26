@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.security.keystore.KeyProperties;
 import android.text.TextUtils;
 import android.util.Log;
@@ -44,27 +45,43 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class Android {
-    private static final String TAG = "chiteroman";
+
+    private static final String TAG = Android.class.getSimpleName();
+    private static final boolean DEBUG = false;
+
     private static final PEMKeyPair EC, RSA;
     private static final ASN1ObjectIdentifier OID = new ASN1ObjectIdentifier("1.3.6.1.4.1.11129.2.1.17");
     private static final List<Certificate> EC_CERTS = new ArrayList<>();
     private static final List<Certificate> RSA_CERTS = new ArrayList<>();
-    private static final Map<String, String> map = new HashMap<>();
+    private static final HashMap<String, Object> map;
     private static final CertificateFactory certificateFactory;
 
+    private static final String cert_device = SystemProperties.get("persist.sys.pihooks.device", "");
+    private static final String cert_fp = SystemProperties.get("persist.sys.pihooks.fingerprint", "");
+    private static final String cert_model = SystemProperties.get("persist.sys.pihooks.model", "");
+    private static final String cert_spl = SystemProperties.get("persist.sys.pihooks.security_patch", "");
+    private static final String cert_manufacturer = SystemProperties.get("persist.sys.pihooks.manufacturer", "");
+    private static final int cert_sdk = SystemProperties.getInt("persist.sys.pihooks.api_level", 0);
+
     static {
-        map.put("MANUFACTURER", "Google");
-        map.put("MODEL", "Pixel");
-        map.put("FINGERPRINT", "google/sailfish/sailfish:8.1.0/OPM1.171019.011/4448085:user/release-keys");
-        map.put("BRAND", "google");
-        map.put("PRODUCT", "sailfish");
-        map.put("DEVICE", "sailfish");
-        map.put("RELEASE", "8.1.0");
-        map.put("ID", "OPM1.171019.011");
-        map.put("INCREMENTAL", "4448085");
-        map.put("SECURITY_PATCH", "2017-12-05");
-        map.put("TYPE", "user");
-        map.put("TAGS", "release-keys");
+        Map<String, Object> tMap = new HashMap<>();
+        String[] sections = cert_fp.split("/");
+        if (!cert_manufacturer.isEmpty()) tMap.put("MANUFACTURER", cert_manufacturer);
+        if (!cert_model.isEmpty()) tMap.put("MODEL", cert_model);
+        if (!cert_fp.isEmpty()) {
+            tMap.put("FINGERPRINT", cert_fp);
+            tMap.put("BRAND", sections[0]);
+            tMap.put("PRODUCT", sections[1]);
+            tMap.put("RELEASE", sections[2].split(":")[1]);
+            tMap.put("ID", sections[3]);
+            tMap.put("INCREMENTAL", sections[4].split(":")[0]);
+            tMap.put("TYPE", sections[4].split(":")[1]);
+            tMap.put("TAGS", sections[5]);
+        }
+        if (!cert_device.isEmpty()) tMap.put("DEVICE", cert_device);
+        if (!cert_spl.isEmpty()) tMap.put("SECURITY_PATCH", cert_spl);
+        if (cert_sdk != 0) tMap.put("DEVICE_INITIAL_SDK_INT", cert_sdk);
+        map = new HashMap<>(tMap);
         try {
             certificateFactory = CertificateFactory.getInstance("X.509");
 
@@ -79,6 +96,10 @@ public final class Android {
             Log.e(TAG, t.toString());
             throw new RuntimeException(t);
         }
+    }
+
+    public static boolean isCertifiedPropsEmpty() {
+        return map.isEmpty();
     }
 
     private static PEMKeyPair parseKeyPair(String key) throws Throwable {
@@ -108,35 +129,54 @@ public final class Android {
     }
 
     public static boolean hasSystemFeature(boolean ret, String name) {
-        if (PackageManager.FEATURE_KEYSTORE_APP_ATTEST_KEY.equals(name) || PackageManager.FEATURE_STRONGBOX_KEYSTORE.equals(name)) {
+        if (PackageManager.FEATURE_KEYSTORE_APP_ATTEST_KEY.equals(name)
+            || PackageManager.FEATURE_STRONGBOX_KEYSTORE.equals(name)) {
             return false;
         }
         return ret;
     }
 
-    public static void newApplication(Context context) {
-        if (context == null) return;
+    public static void newApplication() {
+        map.forEach((k, v) -> setPropValue(k, v)); 
+    }
 
-        String packageName = context.getPackageName();
-        String processName = Application.getProcessName();
-
-        if (TextUtils.isEmpty(packageName) || TextUtils.isEmpty(processName)) return;
-
-        if (!"com.google.android.gms".equals(packageName)) return;
-
-        if (!"com.google.android.gms.unstable".equals(processName)) return;
-
-        map.forEach((fieldName, value) -> {
-            Field field = getField(fieldName);
-            if (field == null) return;
-            field.setAccessible(true);
-            try {
-                field.set(null, value);
-            } catch (Throwable t) {
-                Log.e(TAG, t.toString());
+    private static void setPropValue(String key, Object value) {
+        try {
+            if (value == null || (value instanceof String && ((String) value).isEmpty())) {
+                dlog("setPropValue: Skipping setting empty value for key: " + key);
+                return;
             }
-            field.setAccessible(false);
-        });
+            dlog("setPropValue: Setting property for key: " + key + ", value: " + value.toString());
+            Field field;
+            Class<?> targetClass;
+            try {
+                targetClass = Build.class;
+                field = targetClass.getDeclaredField(key);
+            } catch (NoSuchFieldException e) {
+                targetClass = Build.VERSION.class;
+                field = targetClass.getDeclaredField(key);
+            }
+            if (field != null) {
+                field.setAccessible(true);
+                Class<?> fieldType = field.getType();
+                if (fieldType == int.class || fieldType == Integer.class) {
+                    if (value instanceof Integer) {
+                        field.set(null, value);
+                    } else if (value instanceof String) {
+                        int convertedValue = Integer.parseInt((String) value);
+                        field.set(null, convertedValue);
+                        dlog("setPropValue: Converted value for key " + key + ": " + convertedValue);
+                    }
+                } else if (fieldType == String.class) {
+                    field.set(null, String.valueOf(value));
+                }
+                field.setAccessible(false);
+            }
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            dlog("setPropValue: Failed to set prop " + key);
+        } catch (NumberFormatException e) {
+            dlog("setPropValue: Failed to parse value for field " + key);
+        }
     }
 
     public static Certificate[] engineGetCertificateChain(Certificate[] caList) {
@@ -220,5 +260,9 @@ public final class Android {
             Log.e(TAG, t.toString());
         }
         return caList;
+    }
+
+    public static void dlog(String msg) {
+        if (DEBUG) Log.d(TAG, msg);
     }
 }
