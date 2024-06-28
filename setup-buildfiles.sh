@@ -37,6 +37,8 @@ persist.sys.pihooks.hardware=$(get_field HARDWARE)
 persist.sys.pihooks.api_level=$(get_field DEVICE_INITIAL_SDK_INT)
 EOF
 
+sed -i '/null/d' $service_file
+
 cp -rf $fields_java_file $service_java_file
 }
 
