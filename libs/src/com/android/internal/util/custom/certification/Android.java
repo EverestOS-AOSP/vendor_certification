@@ -61,6 +61,8 @@ public final class Android {
     private static final String cert_model = SystemProperties.get("persist.sys.pihooks.model", "");
     private static final String cert_spl = SystemProperties.get("persist.sys.pihooks.security_patch", "");
     private static final String cert_manufacturer = SystemProperties.get("persist.sys.pihooks.manufacturer", "");
+    private static final String cert_board = SystemProperties.get("persist.sys.pihooks.board", "");
+    private static final String cert_hardware = SystemProperties.get("persist.sys.pihooks.hardware", "");
     private static final int cert_sdk = SystemProperties.getInt("persist.sys.pihooks.api_level", 0);
 
     static {
@@ -80,6 +82,8 @@ public final class Android {
         }
         if (!cert_device.isEmpty()) tMap.put("DEVICE", cert_device);
         if (!cert_spl.isEmpty()) tMap.put("SECURITY_PATCH", cert_spl);
+        if (!cert_board.isEmpty()) tMap.put("BOARD", cert_board);
+        if (!cert_hardware.isEmpty()) tMap.put("HARDWARE", cert_hardware);
         if (cert_sdk != 0) tMap.put("DEVICE_INITIAL_SDK_INT", cert_sdk);
         map = new HashMap<>(tMap);
         try {

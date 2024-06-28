@@ -32,6 +32,8 @@ persist.sys.pihooks.fingerprint=$(get_field FINGERPRINT)
 persist.sys.pihooks.model=$(get_field MODEL)
 persist.sys.pihooks.security_patch=$(get_field SECURITY_PATCH)
 persist.sys.pihooks.manufacturer=$(get_field MANUFACTURER)
+persist.sys.pihooks.board=$(get_field BOARD)
+persist.sys.pihooks.hardware=$(get_field HARDWARE)
 persist.sys.pihooks.api_level=$(get_field DEVICE_INITIAL_SDK_INT)
 EOF
 
