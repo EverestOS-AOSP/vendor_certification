@@ -1,5 +1,11 @@
 # vendor_certification
 
+* First install jq for json parsing.
+
+```bash
+sudo apt install jq
+```
+
 * You can use your own `pif.json` by put it under `configs` folder and run `setup-buildprops.sh`
 * After that, add inherit on your vendor:
 
