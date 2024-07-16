@@ -29,6 +29,7 @@ generate_file() {
   cat <<EOF >"${service_file}"
 persist.sys.pihooks.device=$(get_field DEVICE)
 persist.sys.pihooks.fingerprint=$(get_field FINGERPRINT)
+persist.sys.pihooks.product=$(get_field PRODUCT)
 persist.sys.pihooks.model=$(get_field MODEL)
 persist.sys.pihooks.security_patch=$(get_field SECURITY_PATCH)
 persist.sys.pihooks.manufacturer=$(get_field MANUFACTURER)
