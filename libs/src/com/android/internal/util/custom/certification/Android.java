@@ -37,6 +37,7 @@ import java.lang.reflect.Field;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -183,8 +184,20 @@ public final class Android {
         }
     }
 
+    private static boolean isCallerSafetyNet() {
+        return Arrays.stream(Thread.currentThread().getStackTrace())
+                        .anyMatch(elem -> elem.getClassName().toLowerCase(java.util.Locale.US)
+                            .contains("droidguard"));
+    }
+
     public static Certificate[] engineGetCertificateChain(Certificate[] caList) {
-        if (caList == null) throw new UnsupportedOperationException();
+        if (caList == null
+            || !SystemProperties.getBoolean("persist.sys.pihooks.supports.keybox", false)) {
+            if (isCallerSafetyNet()) {
+                throw new UnsupportedOperationException();
+            }
+            return caList;
+        }
         try {
             X509Certificate leaf = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(caList[0].getEncoded()));
 

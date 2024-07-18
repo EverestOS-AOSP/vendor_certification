@@ -6,6 +6,7 @@
 sudo apt install jq
 ```
 
+* You can enable keybox support by set `persist.sys.pihooks.supports.keybox` to `true`
 * You can use your own `pif.json` by put it under `configs` folder and run `setup-buildprops.sh`
 * After that, add inherit on your vendor:
 
