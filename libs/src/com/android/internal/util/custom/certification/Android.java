@@ -50,6 +50,9 @@ public final class Android {
     private static final String TAG = Android.class.getSimpleName();
     private static final boolean DEBUG = false;
 
+    private static Boolean sEnableCertHook =
+            SystemProperties.getBoolean("persist.sys.certhook.enable", true);
+
     private static final PEMKeyPair EC, RSA;
     private static final ASN1ObjectIdentifier OID = new ASN1ObjectIdentifier("1.3.6.1.4.1.11129.2.1.17");
     private static final List<Certificate> EC_CERTS = new ArrayList<>();
@@ -103,6 +106,10 @@ public final class Android {
         }
     }
 
+    public static boolean isCertHookEnabled() {
+        return sEnableCertHook;
+    }
+
     public static boolean isCertifiedPropsEmpty() {
         return map.isEmpty();
     }
@@ -142,6 +149,8 @@ public final class Android {
     }
 
     public static void newApplication() {
+        if (!sEnableCertHook) return;
+
         map.forEach((k, v) -> setPropValue(k, v)); 
     }
 
@@ -185,12 +194,16 @@ public final class Android {
     }
 
     private static boolean isCallerSafetyNet() {
+        if (!sEnableCertHook) return false;
+
         return Arrays.stream(Thread.currentThread().getStackTrace())
                         .anyMatch(elem -> elem.getClassName().toLowerCase(java.util.Locale.US)
                             .contains("droidguard"));
     }
 
     public static Certificate[] engineGetCertificateChain(Certificate[] caList) {
+        if (!sEnableCertHook) return caList;
+
         if (caList == null
             || !SystemProperties.getBoolean("persist.sys.pihooks.supports.keybox", false)) {
             if (isCallerSafetyNet()) {
