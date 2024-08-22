@@ -8,6 +8,7 @@ import android.os.SystemProperties;
 import android.security.keystore.KeyProperties;
 import android.text.TextUtils;
 import android.util.Log;
+import android.system.keystore2.KeyEntryResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
@@ -22,6 +23,28 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.io.ByteArrayOutputStream;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
+
+import com.android.internal.org.bouncycastle.asn1.ASN1Boolean;
+import com.android.internal.org.bouncycastle.asn1.ASN1Encodable;
+import com.android.internal.org.bouncycastle.asn1.ASN1EncodableVector;
+import com.android.internal.org.bouncycastle.asn1.ASN1Enumerated;
+import com.android.internal.org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import com.android.internal.org.bouncycastle.asn1.ASN1OctetString;
+import com.android.internal.org.bouncycastle.asn1.ASN1Sequence;
+import com.android.internal.org.bouncycastle.asn1.ASN1TaggedObject;
+import com.android.internal.org.bouncycastle.asn1.DEROctetString;
+import com.android.internal.org.bouncycastle.asn1.DERSequence;
+import com.android.internal.org.bouncycastle.asn1.DERTaggedObject;
+import com.android.internal.org.bouncycastle.asn1.x509.Extension;
+import com.android.internal.org.bouncycastle.cert.X509CertificateHolder;
+import com.android.internal.org.bouncycastle.cert.X509v3CertificateBuilder;
+import com.android.internal.org.bouncycastle.operator.ContentSigner;
+import com.android.internal.org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 /**
  * @hide
@@ -29,10 +52,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class Android {
 
     private static final String TAG = Android.class.getSimpleName();
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG =
+            SystemProperties.getBoolean("persist.sys.certhook.debug", false);;
 
     private static Boolean sEnableCertHook =
             SystemProperties.getBoolean("persist.sys.certhook.enable", true);
+    private static Boolean sSupportsKeyBox =
+            SystemProperties.getBoolean("persist.sys.certhook.supports.keybox", true);
 
     private static final HashMap<String, Object> map;
 
@@ -44,6 +70,14 @@ public final class Android {
     private static final String cert_board = SystemProperties.get("persist.sys.pihooks.board", "");
     private static final String cert_hardware = SystemProperties.get("persist.sys.pihooks.hardware", "");
     private static final int cert_sdk = SystemProperties.getInt("persist.sys.pihooks.api_level", 0);
+
+    private static PrivateKey EC, RSA;
+    private static byte[] EC_CERTS;
+    private static byte[] RSA_CERTS;
+    private static ASN1ObjectIdentifier OID = new ASN1ObjectIdentifier("1.3.6.1.4.1.11129.2.1.17");
+    private static CertificateFactory certificateFactory;
+    private static X509CertificateHolder EC_holder, RSA_holder;
+    private static volatile String algo;
 
     static {
         Map<String, Object> tMap = new HashMap<>();
@@ -68,6 +102,171 @@ public final class Android {
         map = new HashMap<>(tMap);
     }
 
+    private static void initCert() {
+        if (!sSupportsKeyBox) return;
+
+        try {
+            certificateFactory = CertificateFactory.getInstance("X.509");
+
+            EC = parsePrivateKey(Keybox.EC.PRIVATE_KEY, KeyProperties.KEY_ALGORITHM_EC);
+            RSA = parsePrivateKey(Keybox.RSA.PRIVATE_KEY, KeyProperties.KEY_ALGORITHM_RSA);
+
+            byte[] EC_cert1 = parseCert(Keybox.EC.CERTIFICATE_1);
+            byte[] RSA_cert1 = parseCert(Keybox.RSA.CERTIFICATE_1);
+
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+
+            stream.write(EC_cert1);
+            stream.write(parseCert(Keybox.EC.CERTIFICATE_2));
+            stream.write(parseCert(Keybox.EC.CERTIFICATE_3));
+
+            EC_CERTS = stream.toByteArray();
+
+            stream.reset();
+
+            stream.write(RSA_cert1);
+            stream.write(parseCert(Keybox.RSA.CERTIFICATE_2));
+            stream.write(parseCert(Keybox.RSA.CERTIFICATE_3));
+
+            RSA_CERTS = stream.toByteArray();
+
+            stream.close();
+
+            EC_holder = new X509CertificateHolder(EC_cert1);
+            RSA_holder = new X509CertificateHolder(RSA_cert1);
+
+        } catch (Throwable t) {
+            dlog(Log.getStackTraceString(t));
+            throw new RuntimeException(t);
+        }
+    }
+
+    private static PrivateKey parsePrivateKey(String str, String algo) throws Throwable {
+        byte[] bytes = Base64.getDecoder().decode(str);
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(bytes);
+        return KeyFactory.getInstance(algo).generatePrivate(spec);
+    }
+
+    private static byte[] parseCert(String str) {
+        return Base64.getDecoder().decode(str);
+    }
+
+    private static byte[] modifyLeaf(byte[] bytes) throws Throwable {
+        X509Certificate leaf = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(bytes));
+
+        if (leaf.getExtensionValue(OID.getId()) == null) throw new Exception();
+
+        X509CertificateHolder holder = new X509CertificateHolder(leaf.getEncoded());
+
+        Extension ext = holder.getExtension(OID);
+
+        ASN1Sequence sequence = ASN1Sequence.getInstance(ext.getExtnValue().getOctets());
+
+        ASN1Encodable[] encodables = sequence.toArray();
+
+        ASN1Sequence teeEnforced = (ASN1Sequence) encodables[7];
+
+        ASN1EncodableVector vector = new ASN1EncodableVector();
+
+        ASN1Sequence rootOfTrust = null;
+        for (ASN1Encodable asn1Encodable : teeEnforced) {
+            ASN1TaggedObject taggedObject = (ASN1TaggedObject) asn1Encodable;
+            if (taggedObject.getTagNo() == 704) {
+                rootOfTrust = (ASN1Sequence) taggedObject.getObject();
+                continue;
+            }
+            vector.add(asn1Encodable);
+        }
+
+        if (rootOfTrust == null) throw new Exception();
+
+        algo = leaf.getPublicKey().getAlgorithm();
+
+        boolean isEC = KeyProperties.KEY_ALGORITHM_EC.equals(algo);
+
+        X509CertificateHolder cert1 = isEC ? EC_holder : RSA_holder;
+        PrivateKey privateKey = isEC ? EC : RSA;
+
+        X509v3CertificateBuilder builder = new X509v3CertificateBuilder(cert1.getSubject(),
+            holder.getSerialNumber(), holder.getNotBefore(), holder.getNotAfter(),
+            holder.getSubject(), holder.getSubjectPublicKeyInfo());
+        ContentSigner signer = new JcaContentSignerBuilder(leaf.getSigAlgName()).build(privateKey);
+
+        byte[] verifiedBootKey = new byte[32];
+        ThreadLocalRandom.current().nextBytes(verifiedBootKey);
+
+        DEROctetString verifiedBootHash = (DEROctetString) rootOfTrust.getObjectAt(3);
+
+        if (verifiedBootHash == null) {
+            byte[] temp = new byte[32];
+            ThreadLocalRandom.current().nextBytes(temp);
+            verifiedBootHash = new DEROctetString(temp);
+        }
+
+        ASN1Encodable[] rootOfTrustEnc = {new DEROctetString(verifiedBootKey),
+            ASN1Boolean.TRUE, new ASN1Enumerated(0), new DEROctetString(verifiedBootHash)};
+
+        ASN1Sequence rootOfTrustSeq = new DERSequence(rootOfTrustEnc);
+
+        ASN1TaggedObject rootOfTrustTagObj = new DERTaggedObject(704, rootOfTrustSeq);
+
+        vector.add(rootOfTrustTagObj);
+
+        ASN1Sequence hackEnforced = new DERSequence(vector);
+
+        encodables[7] = hackEnforced;
+
+        ASN1Sequence hackedSeq = new DERSequence(encodables);
+
+        ASN1OctetString hackedSeqOctets = new DEROctetString(hackedSeq);
+
+        Extension hackedExt = new Extension(OID, false, hackedSeqOctets);
+
+        builder.addExtension(hackedExt);
+
+        for (ASN1ObjectIdentifier extensionOID : holder.getExtensions().getExtensionOIDs()) {
+            if (OID.getId().equals(extensionOID.getId())) continue;
+            builder.addExtension(holder.getExtension(extensionOID));
+        }
+
+        return builder.build(signer).getEncoded();
+    }
+
+    public static KeyEntryResponse onGetKeyEntry(KeyEntryResponse response) {
+        if (!sSupportsKeyBox) {
+            return response;
+        }
+
+        if (response == null)
+            return null;
+
+        if (response.metadata == null)
+            return response;
+
+        algo = null;
+
+        try {
+            byte[] newLeaf = modifyLeaf(response.metadata.certificate);
+            response.metadata.certificateChain = getCertificateChain(algo);
+
+            response.metadata.certificate = newLeaf;
+
+        } catch (Throwable t) {
+            dlog("onGetKeyEntry: " + t);
+        }
+
+        return response;
+    }
+
+    private static byte[] getCertificateChain(String algo) throws Throwable {
+        if (KeyProperties.KEY_ALGORITHM_EC.equals(algo)) {
+            return EC_CERTS;
+        } else if (KeyProperties.KEY_ALGORITHM_RSA.equals(algo)) {
+            return RSA_CERTS;
+        }
+        throw new Exception();
+    }
+
     public static boolean isCertHookEnabled() {
         return sEnableCertHook;
     }
@@ -84,7 +283,7 @@ public final class Android {
             try {
                 field = Build.VERSION.class.getDeclaredField(fieldName);
             } catch (Throwable t) {
-                Log.e(TAG, "Couldn't find field " + fieldName);
+                dlog("Couldn't find field " + fieldName);
             }
         }
         return field;
@@ -154,8 +353,7 @@ public final class Android {
     public static Certificate[] engineGetCertificateChain(Certificate[] caList) {
         if (!sEnableCertHook) return caList;
 
-        if (caList == null
-            || !SystemProperties.getBoolean("persist.sys.pihooks.supports.keybox", false)) {
+        if (caList == null || !sSupportsKeyBox) {
             if (isCallerSafetyNet()) {
                 throw new UnsupportedOperationException();
             }
