@@ -1,9 +1,9 @@
 #!/bin/bash
 
 if [[ $run_from_vendorsetup = true ]]; then
-certif_root="vendor/certification"
+	certif_root="vendor/certification"
 else
-certif_root=$(pwd)
+	certif_root=$(pwd)
 fi
 configs_dir="$certif_root/configs"
 service_file="$certif_root/system.prop"
@@ -14,19 +14,19 @@ fields_java_file="$configs_dir/Keybox.java"
 fields_java_file_public="$configs_dir/Keybox_public.java"
 
 if [ ! -f $fields_file ]; then
-  fields_file=$fields_file_public
+	fields_file=$fields_file_public
 fi
 
 if [ ! -f $fields_java_file ]; then
-  fields_java_file=$fields_java_file_public
+	fields_java_file=$fields_java_file_public
 fi
 
 get_field() {
-  echo `cat "$fields_file" | jq -r ".$1"`
+	echo $(cat "$fields_file" | jq -r ".$1")
 }
 
 generate_file() {
-  cat <<EOF >"${service_file}"
+	cat <<EOF >"${service_file}"
 persist.sys.pihooks.device=$(get_field DEVICE)
 persist.sys.pihooks.fingerprint=$(get_field FINGERPRINT)
 persist.sys.pihooks.product=$(get_field PRODUCT)
@@ -38,9 +38,9 @@ persist.sys.pihooks.hardware=$(get_field HARDWARE)
 persist.sys.pihooks.api_level=$(get_field DEVICE_INITIAL_SDK_INT)
 EOF
 
-sed -i '/null/d' $service_file
+	sed -i '/null/d' $service_file
 
-cp -rf $fields_java_file $service_java_file
+	cp -rf $fields_java_file $service_java_file
 }
 
 generate_file
