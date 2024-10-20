@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ $run_from_vendorsetup = true ]]; then
+if [ -d "vendor/certification" ]; then
 	certif_root="vendor/certification"
 else
 	certif_root=$(pwd)
