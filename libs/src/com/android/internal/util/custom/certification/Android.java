@@ -60,16 +60,25 @@ public final class Android {
     private static Boolean sSupportsKeyBox =
             SystemProperties.getBoolean("persist.sys.certhook.supports.keybox", true);
 
-    private static final HashMap<String, Object> map;
+    public class PiHookProperties {
+        private static String getAttestProp(String property, boolean attest) {
+            return TextUtils.formatSimple("persist.sys.pihooks.%s", attest ? property + "_for_attestation" : property);
+        }
 
-    private static final String cert_device = SystemProperties.get("persist.sys.pihooks.device", "");
-    private static final String cert_fp = SystemProperties.get("persist.sys.pihooks.fingerprint", "");
-    private static final String cert_model = SystemProperties.get("persist.sys.pihooks.model", "");
-    private static final String cert_spl = SystemProperties.get("persist.sys.pihooks.security_patch", "");
-    private static final String cert_manufacturer = SystemProperties.get("persist.sys.pihooks.manufacturer", "");
-    private static final String cert_board = SystemProperties.get("persist.sys.pihooks.board", "");
-    private static final String cert_hardware = SystemProperties.get("persist.sys.pihooks.hardware", "");
-    private static final int cert_sdk = SystemProperties.getInt("persist.sys.pihooks.api_level", 0);
+        public static String get(String property, String defVal, boolean attest) {
+            return SystemProperties.get(getAttestProp(property, attest), defVal);
+        }
+
+        public static int getInt(String property, int defVal, boolean attest) {
+            return SystemProperties.getInt(getAttestProp(property, attest), defVal);
+        }
+
+        public static boolean getBoolean(String property, boolean defVal, boolean attest) {
+            return SystemProperties.getBoolean(getAttestProp(property, attest), defVal);
+        }
+    }
+
+    private static final HashMap<String, Object> map = new HashMap<>();
 
     private static PrivateKey EC, RSA;
     private static byte[] EC_CERTS;
@@ -80,26 +89,53 @@ public final class Android {
     private static volatile String algo;
 
     static {
-        Map<String, Object> tMap = new HashMap<>();
-        String[] sections = cert_fp.split("/");
-        if (!cert_manufacturer.isEmpty()) tMap.put("MANUFACTURER", cert_manufacturer);
-        if (!cert_model.isEmpty()) tMap.put("MODEL", cert_model);
-        if (!cert_fp.isEmpty()) {
-            tMap.put("FINGERPRINT", cert_fp);
-            tMap.put("BRAND", sections[0]);
-            tMap.put("PRODUCT", sections[1]);
-            tMap.put("RELEASE", sections[2].split(":")[1]);
-            tMap.put("ID", sections[3]);
-            tMap.put("INCREMENTAL", sections[4].split(":")[0]);
-            tMap.put("TYPE", sections[4].split(":")[1]);
-            tMap.put("TAGS", sections[5]);
+        putIfNotEmpty("device", map, false);
+        putIfNotEmpty("fingerprint", map, false);
+        putIfNotEmpty("product", map, false);
+        putIfNotEmpty("model", map, false);
+        putIfNotEmpty("brand", map, false);
+        putIfNotEmpty("security_patch", map, false);
+        putIfNotEmpty("manufacturer", map, false);
+        putIfNotEmpty("board", map, false);
+        putIfNotEmpty("hardware", map, false);
+        putIfNotEmpty("device_initial_sdk_int", map, false);
+        putIfNotEmpty("release", map, false);
+        putIfNotEmpty("id", map, false);
+        putIfNotEmpty("incremental", map, false);
+        putIfNotEmpty("type", map, false);
+        putIfNotEmpty("tags", map, false);
+        // *_for_attestation
+        putIfNotEmpty("device", map, true);
+        putIfNotEmpty("product", map, true);
+        putIfNotEmpty("model", map, true);
+        putIfNotEmpty("brand", map, true);
+        putIfNotEmpty("manufacturer", map, true);
+    }
+
+    private static void putIfNotEmpty(String prop, Map<String, Object> map, boolean attest) {
+        String ret = PiHookProperties.get(prop, "", attest);
+        if (ret.isEmpty()) return;
+        switch(prop) {
+            case "fingerprint":
+                String[] sections = ret.split("/");
+                map.put(prop.toUpperCase(), ret);
+                map.put("PRODUCT", sections[1]);
+                map.put("BRAND", sections[0]);
+                map.put("RELEASE", sections[2].split(":")[1]);
+                map.put("ID", sections[3]);
+                map.put("INCREMENTAL", sections[4].split(":")[0]);
+                map.put("TYPE", sections[4].split(":")[1]);
+                map.put("TAGS", sections[5]);
+                break;
+            case "device_initial_sdk_int":
+                if (!ret.equals("0")) {
+                    map.put(prop.toUpperCase(), Integer.parseInt(ret));
+                }
+                break;
+            default:
+                map.put(prop.toUpperCase(), ret);
+                break;
         }
-        if (!cert_device.isEmpty()) tMap.put("DEVICE", cert_device);
-        if (!cert_spl.isEmpty()) tMap.put("SECURITY_PATCH", cert_spl);
-        if (!cert_board.isEmpty()) tMap.put("BOARD", cert_board);
-        if (!cert_hardware.isEmpty()) tMap.put("HARDWARE", cert_hardware);
-        if (cert_sdk != 0) tMap.put("DEVICE_INITIAL_SDK_INT", cert_sdk);
-        map = new HashMap<>(tMap);
     }
 
     private static void initCert() {
