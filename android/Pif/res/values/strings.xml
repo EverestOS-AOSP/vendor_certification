@@ -13,6 +13,8 @@
     <string name="strong_integrity_title">Strong integrity approver</string>
     <string name="strong_integrity_summary">Enable support for approving srong integrity. May not supported on some devices.</string>
 
+    <string name="info">Information</string>
+
     <string name="manufacturer_title">Manufacturer</string>
     <string name="model_title">Model</string>
     <string name="fingerprint_title">Fingerprint</string>
@@ -26,6 +28,7 @@
     <string name="tags_title">Tags</string>
     <string name="security_patch_title">Security patch</string>
     <string name="device_initial_sdk_int_title">Shipping API level</string>
+
     <string name="attestation">Attestation</string>
 
 </resources>

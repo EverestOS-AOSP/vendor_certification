@@ -21,100 +21,107 @@
         android:summary="@string/strong_integrity_summary"
         android:defaultValue="true"/>
 
-    <Preference
-        android:key="manufacturer"
-        android:title="@string/manufacturer_title"
-        android:selectable="false" />
-
-    <Preference
-        android:key="model"
-        android:title="@string/model_title"
-        android:selectable="false" />
-
-    <Preference
-        android:key="fingerprint"
-        android:title="@string/fingerprint_title"
-        android:selectable="false" />
-
-    <Preference
-        android:key="brand"
-        android:title="@string/brand_title"
-        android:selectable="false" />
-
-    <Preference
-        android:key="product"
-        android:title="@string/product_title"
-        android:selectable="false" />
-
-    <Preference
-        android:key="device"
-        android:title="@string/device_title"
-        android:selectable="false" />
-
-    <Preference
-        android:key="release"
-        android:title="@string/release_title"
-        android:selectable="false" />
-
-    <Preference
-        android:key="id"
-        android:title="@string/id_title"
-        android:selectable="false" />
-
-    <Preference
-        android:key="incremental"
-        android:title="@string/incremental_title"
-        android:selectable="false" />
-
-    <Preference
-        android:key="type"
-        android:title="@string/type_title"
-        android:selectable="false" />
-
-    <Preference
-        android:key="tags"
-        android:title="@string/tags_title"
-        android:selectable="false" />
-
-    <Preference
-        android:key="security_patch"
-        android:title="@string/security_patch_title"
-        android:selectable="false" />
-
-    <Preference
-        android:key="device_initial_sdk_int"
-        android:title="@string/device_initial_sdk_int_title"
-        android:selectable="false" />
-
     <PreferenceCategory
-        android:key="attestation"
-        android:title="@string/attestation"
+        android:key="info"
+        android:title="@string/info"
         android:selectable="false">
 
         <Preference
-            android:key="manufacturer_for_attestation"
+            android:key="manufacturer"
             android:title="@string/manufacturer_title"
             android:selectable="false" />
-
+    
         <Preference
-            android:key="model_for_attestation"
+            android:key="model"
             android:title="@string/model_title"
             android:selectable="false" />
-
+    
         <Preference
-            android:key="brand_for_attestation"
+            android:key="fingerprint"
+            android:title="@string/fingerprint_title"
+            android:selectable="false" />
+    
+        <Preference
+            android:key="brand"
             android:title="@string/brand_title"
             android:selectable="false" />
-
+    
         <Preference
-            android:key="product_for_attestation"
+            android:key="product"
             android:title="@string/product_title"
             android:selectable="false" />
-
+    
         <Preference
-            android:key="device_for_attestation"
+            android:key="device"
             android:title="@string/device_title"
             android:selectable="false" />
+    
+        <Preference
+            android:key="release"
+            android:title="@string/release_title"
+            android:selectable="false" />
+    
+        <Preference
+            android:key="id"
+            android:title="@string/id_title"
+            android:selectable="false" />
+    
+        <Preference
+            android:key="incremental"
+            android:title="@string/incremental_title"
+            android:selectable="false" />
+    
+        <Preference
+            android:key="type"
+            android:title="@string/type_title"
+            android:selectable="false" />
+    
+        <Preference
+            android:key="tags"
+            android:title="@string/tags_title"
+            android:selectable="false" />
+    
+        <Preference
+            android:key="security_patch"
+            android:title="@string/security_patch_title"
+            android:selectable="false" />
+    
+        <Preference
+            android:key="device_initial_sdk_int"
+            android:title="@string/device_initial_sdk_int_title"
+            android:selectable="false" />
+    
+        <PreferenceCategory
+            android:key="attestation"
+            android:title="@string/attestation"
+            android:selectable="false">
+    
+            <Preference
+                android:key="manufacturer_for_attestation"
+                android:title="@string/manufacturer_title"
+                android:selectable="false" />
+    
+            <Preference
+                android:key="model_for_attestation"
+                android:title="@string/model_title"
+                android:selectable="false" />
+    
+            <Preference
+                android:key="brand_for_attestation"
+                android:title="@string/brand_title"
+                android:selectable="false" />
+    
+            <Preference
+                android:key="product_for_attestation"
+                android:title="@string/product_title"
+                android:selectable="false" />
+    
+            <Preference
+                android:key="device_for_attestation"
+                android:title="@string/device_title"
+                android:selectable="false" />
+    
+        </PreferenceCategory>
 
     </PreferenceCategory>
 
