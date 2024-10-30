@@ -5,25 +5,16 @@
 
 package com.goolag.pif;
 
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 
 import androidx.preference.Preference;
-import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
 
+import com.android.internal.util.custom.certification.Android.PiHookProperties;
 import com.android.settingslib.widget.TopIntroPreference;
 
-import com.goolag.pif.R;
-
-import com.android.internal.util.custom.certification.Android;
-import com.android.internal.util.custom.certification.Android.PiHookProperties;
-
-public class Pif extends PreferenceFragmentCompat
-        implements Preference.OnPreferenceChangeListener {
+public class Pif extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     private TopIntroPreference mIntroPreference;
 
@@ -51,10 +42,10 @@ public class Pif extends PreferenceFragmentCompat
         setSummaryIfNotEmpty("tags", false);
         // *_for_attestation
         if (!setSummaryIfNotEmpty("device", true)
-            && !setSummaryIfNotEmpty("product", true)
-            && !setSummaryIfNotEmpty("model", true)
-            && !setSummaryIfNotEmpty("brand", true)
-            && !setSummaryIfNotEmpty("manufacturer", true)) {
+                && !setSummaryIfNotEmpty("product", true)
+                && !setSummaryIfNotEmpty("model", true)
+                && !setSummaryIfNotEmpty("brand", true)
+                && !setSummaryIfNotEmpty("manufacturer", true)) {
             getPreferenceScreen().removePreference(findPreference("attestation"));
         }
     }
