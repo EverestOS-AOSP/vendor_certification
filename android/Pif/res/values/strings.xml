@@ -6,6 +6,8 @@
 <resources>
     <string name="app_name">Pif</string>
 
+    <string name="summary_empty" translatable="false"></string>
+
     <string name="pif_title">Integrity Settings</string>
 
     <string name="standard_integrity_title">Standard integrity approver</string>
