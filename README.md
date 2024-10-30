@@ -6,7 +6,6 @@
 sudo apt install jq
 ```
 
-* You can disable keybox support by set `persist.sys.certhook.supports.keybox` to `false`
 * You can use your own `pif.json` by put it under `configs` folder and run `setup-buildprops.sh`
 * After that, add inherit on your vendor:
 
