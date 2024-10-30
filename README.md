@@ -1,4 +1,4 @@
-# vendor_certification
+# vendor_parasite_certification
 
 * First install jq for json parsing.
 
@@ -10,5 +10,5 @@ sudo apt install jq
 * After that, add inherit on your vendor:
 
 ```makefile
-$(call inherit-product-if-exists, vendor/certification/config.mk)
+$(call inherit-product-if-exists, vendor/parasite/certification/config.mk)
 ```

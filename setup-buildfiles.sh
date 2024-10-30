@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ -d "vendor/certification" ]; then
-	certif_root="vendor/certification"
+if [ -d "vendor/parasite/certification" ]; then
+	certif_root="vendor/parasite/certification"
 else
 	certif_root=$(pwd)
 fi
