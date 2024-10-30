@@ -73,4 +73,37 @@
         android:key="device_initial_sdk_int"
         android:title="@string/device_initial_sdk_int_title"
         android:selectable="false" />
+
+    <PreferenceCategory
+        android:key="attestation"
+        android:title="@string/attestation"
+        android:selectable="false">
+
+        <Preference
+            android:key="manufacturer_for_attestation"
+            android:title="@string/manufacturer_title"
+            android:selectable="false" />
+
+        <Preference
+            android:key="model_for_attestation"
+            android:title="@string/model_title"
+            android:selectable="false" />
+
+        <Preference
+            android:key="brand_for_attestation"
+            android:title="@string/brand_title"
+            android:selectable="false" />
+
+        <Preference
+            android:key="product_for_attestation"
+            android:title="@string/product_title"
+            android:selectable="false" />
+
+        <Preference
+            android:key="device_for_attestation"
+            android:title="@string/device_title"
+            android:selectable="false" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

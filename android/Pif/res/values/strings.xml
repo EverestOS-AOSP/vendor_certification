@@ -20,5 +20,6 @@
     <string name="tags_title">Tags</string>
     <string name="security_patch_title">Security patch</string>
     <string name="device_initial_sdk_int_title">Shipping API level</string>
+    <string name="attestation">Attestation</string>
 
 </resources>
