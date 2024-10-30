@@ -6,7 +6,7 @@
 <resources>
 
     <string name="app_name">Pif</string>
-    <string name="pif_title">Play integrity fix</string>
+    <string name="pif_title">Integrity Settings</string>
     <string name="manufacturer_title">Manufacturer</string>
     <string name="model_title">Model</string>
     <string name="fingerprint_title">Fingerprint</string>
