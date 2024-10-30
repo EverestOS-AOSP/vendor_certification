@@ -4,9 +4,15 @@
      SPDX-License-Identifier: Apache-2.0
 -->
 <resources>
-
     <string name="app_name">Pif</string>
+
     <string name="pif_title">Integrity Settings</string>
+
+    <string name="standard_integrity_title">Standard integrity approver</string>
+    <string name="standard_integrity_summary">Enable support for approving standard integrity. Supported on most of devices.</string>
+    <string name="strong_integrity_title">Strong integrity approver</string>
+    <string name="strong_integrity_summary">Enable support for approving srong integrity. May not supported on some devices.</string>
+
     <string name="manufacturer_title">Manufacturer</string>
     <string name="model_title">Model</string>
     <string name="fingerprint_title">Fingerprint</string>
