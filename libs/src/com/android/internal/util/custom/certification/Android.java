@@ -113,6 +113,14 @@ public final class Android {
     }
 
     private static void putIfNotEmpty(String prop, Map<String, Object> map, boolean attest) {
+        if (prop.equals("device_initial_sdk_int")) {
+            int ret = PiHookProperties.getInt(prop, 0, attest);
+            if (ret > 0) {
+                map.put(prop.toUpperCase(), ret);
+            }
+            return;
+        }
+
         String ret = PiHookProperties.get(prop, "", attest);
         if (ret.isEmpty()) return;
         switch(prop) {
@@ -126,11 +134,6 @@ public final class Android {
                 map.put("INCREMENTAL", sections[4].split(":")[0]);
                 map.put("TYPE", sections[4].split(":")[1]);
                 map.put("TAGS", sections[5]);
-                break;
-            case "device_initial_sdk_int":
-                if (!ret.equals("0")) {
-                    map.put(prop.toUpperCase(), Integer.parseInt(ret));
-                }
                 break;
             default:
                 map.put(prop.toUpperCase(), ret);
