@@ -57,8 +57,8 @@ public final class Android {
 
     private static Boolean sEnableCertHook =
             SystemProperties.getBoolean("persist.sys.certhook.enable", true);
-    private static Boolean sSupportsKeyBox =
-            SystemProperties.getBoolean("persist.sys.certhook.supports.keybox", true);
+    private static Boolean sEnableKeyBoxHook =
+            SystemProperties.getBoolean("persist.sys.keyboxhook.enable", true);
 
     public class PiHookProperties {
         private static String getAttestProp(String property, boolean attest) {
@@ -139,7 +139,7 @@ public final class Android {
     }
 
     private static void initCert() {
-        if (!sSupportsKeyBox) return;
+        if (!sEnableKeyBoxHook) return;
 
         try {
             certificateFactory = CertificateFactory.getInstance("X.509");
@@ -269,7 +269,7 @@ public final class Android {
     }
 
     public static KeyEntryResponse onGetKeyEntry(KeyEntryResponse response) {
-        if (!sSupportsKeyBox) {
+        if (!sEnableKeyBoxHook) {
             return response;
         }
 
@@ -389,7 +389,7 @@ public final class Android {
     public static Certificate[] engineGetCertificateChain(Certificate[] caList) {
         if (!sEnableCertHook) return caList;
 
-        if (caList == null || !sSupportsKeyBox) {
+        if (caList == null || !sEnableKeyBoxHook) {
             if (isCallerSafetyNet()) {
                 throw new UnsupportedOperationException();
             }
