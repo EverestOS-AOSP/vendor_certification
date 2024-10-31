@@ -3,8 +3,9 @@
      Copyright (C) 2023-2024 The Evolution X Project
      SPDX-License-Identifier: Apache-2.0
 -->
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:settings="http://schemas.android.com/apk/res/com.goolag.pif">
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:settings="http://schemas.android.com/apk/res-auto">
 
     <com.android.settingslib.widget.TopIntroPreference
         android:key="device_intro"/>
@@ -29,77 +30,92 @@
         <Preference
             android:key="manufacturer"
             android:title="@string/manufacturer_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
     
         <Preference
             android:key="model"
             android:title="@string/model_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
     
         <Preference
             android:key="fingerprint"
             android:title="@string/fingerprint_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
     
         <Preference
             android:key="brand"
             android:title="@string/brand_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
     
         <Preference
             android:key="product"
             android:title="@string/product_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
     
         <Preference
             android:key="device"
             android:title="@string/device_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
     
         <Preference
             android:key="release"
             android:title="@string/release_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
     
         <Preference
             android:key="id"
             android:title="@string/id_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
     
         <Preference
             android:key="incremental"
             android:title="@string/incremental_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
 
         <Preference
             android:key="board"
             android:title="@string/board_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
 
         <Preference
             android:key="hardware"
             android:title="@string/hardware_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
     
         <Preference
             android:key="type"
             android:title="@string/type_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
     
         <Preference
             android:key="tags"
             android:title="@string/tags_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
     
         <Preference
             android:key="security_patch"
             android:title="@string/security_patch_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
     
         <Preference
             android:key="device_initial_sdk_int"
             android:title="@string/device_initial_sdk_int_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
 
     </PreferenceCategory>
 
@@ -111,27 +127,32 @@
         <Preference
             android:key="manufacturer_for_attestation"
             android:title="@string/manufacturer_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
 
         <Preference
             android:key="model_for_attestation"
             android:title="@string/model_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
 
         <Preference
             android:key="brand_for_attestation"
             android:title="@string/brand_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
 
         <Preference
             android:key="product_for_attestation"
             android:title="@string/product_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
 
         <Preference
             android:key="device_for_attestation"
             android:title="@string/device_title"
-            android:selectable="false" />
+            android:selectable="false"
+            settings:enableCopying="true"/>
 
     </PreferenceCategory>
 
