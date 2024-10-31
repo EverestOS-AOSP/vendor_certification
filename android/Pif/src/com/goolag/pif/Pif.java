@@ -12,14 +12,18 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 
+import com.android.internal.util.custom.CustomUtils;
 import com.android.internal.util.custom.certification.Android.PiHookProperties;
 import com.android.settingslib.widget.TopIntroPreference;
+import com.android.settings.custom.preference.SystemPropertySwitchPreference;
 
 import java.util.ArrayList;
 
 public class Pif extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     private TopIntroPreference mIntroPreference;
+    private SystemPropertySwitchPreference mCertHook;
+    private SystemPropertySwitchPreference mKeyBoxHook;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -27,6 +31,11 @@ public class Pif extends PreferenceFragmentCompat implements Preference.OnPrefer
 
         mIntroPreference = findPreference("device_intro");
         mIntroPreference.setTitle(Build.MANUFACTURER + " " + Build.MODEL);
+
+        mCertHook = (SystemPropertySwitchPreference) findPreference("persist.sys.certhook.enable");
+        mCertHook.setOnPreferenceChangeListener(this);
+        mKeyBoxHook = (SystemPropertySwitchPreference) findPreference("persist.sys.keyboxhook.enable");
+        mKeyBoxHook.setOnPreferenceChangeListener(this);
 
         ArrayList<String> infoPrefs = new ArrayList<String>();
         infoPrefs.add("device");
@@ -61,7 +70,15 @@ public class Pif extends PreferenceFragmentCompat implements Preference.OnPrefer
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        return true;
+        final String key = preference.getKey();
+        switch (key) {
+            case "persist.sys.certhook.enable":
+            case "persist.sys.keyboxhook.enable":
+                CustomUtils.restartApp("com.google.android.gms", getActivity());
+                CustomUtils.restartApp("com.android.vending", getActivity());
+                return true;
+        }
+        return false;
     }
 
     private boolean setSummaryIfNotEmpty(String prop, boolean attest, String category) {
