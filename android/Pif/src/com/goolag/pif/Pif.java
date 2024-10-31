@@ -9,10 +9,13 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.android.internal.util.custom.certification.Android.PiHookProperties;
 import com.android.settingslib.widget.TopIntroPreference;
+
+import java.util.ArrayList;
 
 public class Pif extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
@@ -25,28 +28,34 @@ public class Pif extends PreferenceFragmentCompat implements Preference.OnPrefer
         mIntroPreference = findPreference("device_intro");
         mIntroPreference.setTitle(Build.MANUFACTURER + " " + Build.MODEL);
 
-        setSummaryIfNotEmpty("device", false);
-        setSummaryIfNotEmpty("fingerprint", false);
-        setSummaryIfNotEmpty("product", false);
-        setSummaryIfNotEmpty("model", false);
-        setSummaryIfNotEmpty("brand", false);
-        setSummaryIfNotEmpty("security_patch", false);
-        setSummaryIfNotEmpty("manufacturer", false);
-        setSummaryIfNotEmpty("board", false);
-        setSummaryIfNotEmpty("hardware", false);
-        setSummaryIfNotEmpty("device_initial_sdk_int", false);
-        setSummaryIfNotEmpty("release", false);
-        setSummaryIfNotEmpty("id", false);
-        setSummaryIfNotEmpty("incremental", false);
-        setSummaryIfNotEmpty("type", false);
-        setSummaryIfNotEmpty("tags", false);
+        ArrayList<String> infoPrefs = new ArrayList<String>();
+        infoPrefs.add("device");
+        infoPrefs.add("fingerprint");
+        infoPrefs.add("product");
+        infoPrefs.add("model");
+        infoPrefs.add("brand");
+        infoPrefs.add("security_patch");
+        infoPrefs.add("manufacturer");
+        infoPrefs.add("board");
+        infoPrefs.add("hardware");
+        infoPrefs.add("device_initial_sdk_int");
+        infoPrefs.add("release");
+        infoPrefs.add("id");
+        infoPrefs.add("incremental");
+        infoPrefs.add("type");
+        infoPrefs.add("tags");
+        for (String i : infoPrefs) {
+            setSummaryIfNotEmpty(i, false, "info");
+        }
         // *_for_attestation
-        if (!setSummaryIfNotEmpty("device", true)
-                && !setSummaryIfNotEmpty("product", true)
-                && !setSummaryIfNotEmpty("model", true)
-                && !setSummaryIfNotEmpty("brand", true)
-                && !setSummaryIfNotEmpty("manufacturer", true)) {
-            getPreferenceScreen().removePreference(findPreference("attestation"));
+        infoPrefs.clear();
+        infoPrefs.add("device");
+        infoPrefs.add("product");
+        infoPrefs.add("model");
+        infoPrefs.add("brand");
+        infoPrefs.add("manufacturer");
+        for (String i : infoPrefs) {
+            setSummaryIfNotEmpty(i, true, "attestation");
         }
     }
 
@@ -55,11 +64,16 @@ public class Pif extends PreferenceFragmentCompat implements Preference.OnPrefer
         return true;
     }
 
-    private boolean setSummaryIfNotEmpty(String prop, boolean attest) {
+    private boolean setSummaryIfNotEmpty(String prop, boolean attest, String category) {
         final Preference pref = findPreference(attest ? prop + "_for_attestation" : prop);
         String ret = PiHookProperties.get(prop, "", attest);
         if (ret.isEmpty()) {
-            getPreferenceScreen().removePreference(pref);
+            if (category != null) {
+                PreferenceCategory categ = (PreferenceCategory) findPreference(category);
+                categ.removePreference(pref);
+            } else {
+                getPreferenceScreen().removePreference(pref);
+            }
             return false;
         }
         pref.setSummary(ret);
