@@ -1,15 +1,15 @@
 {
     "MANUFACTURER": "Google",
     "MODEL": "Pixel 9",
-    "FINGERPRINT": "google/tokay_beta/tokay:15/BP11.241025.006/12620009:user/release-keys",
+    "FINGERPRINT": "google/tokay_beta/tokay:Baklava/BP21.241121.009/12787338:user/release-keys",
     "BRAND": "google",
     "PRODUCT": "tokay_beta",
     "DEVICE": "tokay",
-    "RELEASE": "15",
-    "ID": "BP11.241025.006",
-    "INCREMENTAL": "12620009",
+    "RELEASE": "Baklava",
+    "ID": "BP21.241121.009",
+    "INCREMENTAL": "12787338",
     "TYPE": "user",
     "TAGS": "release-keys",
-    "SECURITY_PATCH": "2024-11-05",
+    "SECURITY_PATCH": "2024-12-05",
     "DEVICE_INITIAL_SDK_INT": "24"
 }
