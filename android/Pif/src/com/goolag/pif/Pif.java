@@ -15,7 +15,8 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.android.internal.util.custom.CustomUtils;
 import com.android.internal.util.custom.certification.Android.PiHookProperties;
 import com.android.settingslib.widget.TopIntroPreference;
-import com.android.settings.custom.preference.SystemPropertySwitchPreference;
+
+import lineageos.preference.SystemPropertySwitchPreference;
 
 import java.util.ArrayList;
 

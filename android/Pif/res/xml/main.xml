@@ -10,13 +10,13 @@
     <com.android.settingslib.widget.TopIntroPreference
         android:key="device_intro"/>
 
-    <com.android.settings.custom.preference.SystemPropertySwitchPreference
+    <lineageos.preference.SystemPropertySwitchPreference
         android:key="persist.sys.certhook.enable"
         android:title="@string/standard_integrity_title"
         android:summary="@string/standard_integrity_summary"
         android:defaultValue="true"/>
 
-    <com.android.settings.custom.preference.SystemPropertySwitchPreference
+    <lineageos.preference.SystemPropertySwitchPreference
         android:key="persist.sys.keyboxhook.enable"
         android:title="@string/strong_integrity_title"
         android:summary="@string/strong_integrity_summary"
