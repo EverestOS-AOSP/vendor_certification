@@ -1,7 +1,5 @@
 pif.json 
-Keybox.java
 config.xml
 system.prop
 configs/*
 !pif_public.json
-!Keybox_public.java

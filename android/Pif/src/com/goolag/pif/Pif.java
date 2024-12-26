@@ -24,7 +24,6 @@ public class Pif extends PreferenceFragmentCompat implements Preference.OnPrefer
 
     private TopIntroPreference mIntroPreference;
     private SystemPropertySwitchPreference mCertHook;
-    private SystemPropertySwitchPreference mKeyBoxHook;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -35,8 +34,6 @@ public class Pif extends PreferenceFragmentCompat implements Preference.OnPrefer
 
         mCertHook = (SystemPropertySwitchPreference) findPreference("persist.sys.certhook.enable");
         mCertHook.setOnPreferenceChangeListener(this);
-        mKeyBoxHook = (SystemPropertySwitchPreference) findPreference("persist.sys.keyboxhook.enable");
-        mKeyBoxHook.setOnPreferenceChangeListener(this);
 
         ArrayList<String> infoPrefs = new ArrayList<String>();
         infoPrefs.add("device");
@@ -74,7 +71,6 @@ public class Pif extends PreferenceFragmentCompat implements Preference.OnPrefer
         final String key = preference.getKey();
         switch (key) {
             case "persist.sys.certhook.enable":
-            case "persist.sys.keyboxhook.enable":
                 CustomUtils.restartApp("com.google.android.gms", getActivity());
                 CustomUtils.restartApp("com.android.vending", getActivity());
                 return true;

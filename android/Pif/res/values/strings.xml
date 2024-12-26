@@ -12,8 +12,6 @@
 
     <string name="standard_integrity_title">Standard integrity approver</string>
     <string name="standard_integrity_summary">Enable support for approving standard integrity. Supported on most of devices.</string>
-    <string name="strong_integrity_title">Strong integrity approver</string>
-    <string name="strong_integrity_summary">Enable support for approving srong integrity. May not supported on some devices.</string>
 
     <string name="info">Information</string>
 
