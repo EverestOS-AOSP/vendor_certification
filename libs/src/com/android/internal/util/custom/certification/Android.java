@@ -2,16 +2,25 @@ package com.android.internal.util.custom.certification;
 
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Environment;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -22,6 +31,7 @@ public final class Android {
     private static final String TAG = Android.class.getSimpleName();
     private static final boolean DEBUG =
             SystemProperties.getBoolean("persist.sys.certhook.debug", false);
+    private static final String DATA_FILE = "gms_certified_props.json";
 
     private static Boolean sEnableCertHook =
             SystemProperties.getBoolean("persist.sys.certhook.enable", true);
@@ -133,7 +143,47 @@ public final class Android {
     public static void newApplication() {
         if (!sEnableCertHook) return;
 
-        map.forEach((k, v) -> setPropValue(k, v));
+        // Load dynamic props from gms_certified_props.json
+        File dataFile = new File(Environment.getDataSystemDirectory(), DATA_FILE);
+        String savedProps = readFromFile(dataFile);
+
+        if (!TextUtils.isEmpty(savedProps)) {
+            try {
+                dlog("Parsing props fetched by attestation service");
+                JSONObject parsedProps = new JSONObject(savedProps);
+                Iterator<String> keys = parsedProps.keys();
+
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    String value = parsedProps.getString(key);
+                    setPropValue(key, value);
+                }
+                return;
+            } catch (JSONException e) {
+                dlog("Error parsing JSON data: " + e.getMessage());
+                // Fall back to default props
+                map.forEach((k, v) -> setPropValue(k, v));
+            }
+        } else {
+            dlog("Using default device props - data file unavailable");
+            map.forEach((k, v) -> setPropValue(k, v));
+        }
+    }
+
+    private static String readFromFile(File file) {
+        StringBuilder content = new StringBuilder();
+
+        if (file.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    content.append(line);
+                }
+            } catch (IOException e) {
+                dlog("Error reading from file: " + e.getMessage());
+            }
+        }
+        return content.toString();
     }
 
     private static void setPropValue(String key, Object value) {
@@ -161,11 +211,23 @@ public final class Android {
                     } else if (value instanceof String) {
                         int convertedValue = Integer.parseInt((String) value);
                         field.set(null, convertedValue);
-                        dlog(
-                                "setPropValue: Converted value for key "
-                                        + key
-                                        + ": "
-                                        + convertedValue);
+                        dlog("setPropValue: Converted value for key " + key + ": " + convertedValue);
+                    }
+                } else if (fieldType == long.class || fieldType == Long.class) {
+                    if (value instanceof Long) {
+                        field.set(null, value);
+                    } else if (value instanceof String) {
+                        long convertedValue = Long.parseLong((String) value);
+                        field.set(null, convertedValue);
+                        dlog("setPropValue: Converted value for key " + key + ": " + convertedValue);
+                    }
+                } else if (fieldType == boolean.class || fieldType == Boolean.class) {
+                    if (value instanceof Boolean) {
+                        field.set(null, value);
+                    } else if (value instanceof String) {
+                        boolean convertedValue = Boolean.parseBoolean((String) value);
+                        field.set(null, convertedValue);
+                        dlog("setPropValue: Converted value for key " + key + ": " + convertedValue);
                     }
                 } else if (fieldType == String.class) {
                     field.set(null, String.valueOf(value));

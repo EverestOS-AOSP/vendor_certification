@@ -1,3 +1,3 @@
-TARGET_SYSTEM_PROP += vendor/parasite/certification/system.prop
+TARGET_SYSTEM_PROP += vendor/certification/system.prop
 
-$(shell bash vendor/parasite/certification/setup-buildfiles.sh)
+$(shell bash vendor/certification/setup-buildfiles.sh)
